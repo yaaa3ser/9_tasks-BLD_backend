@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    {% for artist_album in artistsWithAlbums %}
+        <h1> id : {{artist_album.artist.id}}</h1>
+        <h1> Stage Name : {{artist_album.artist.stageName}} </h1>
+        <h1> Social : {{artist_album.artist.socialLink}}</h1>
+        <h1>Albums : </h1>
+        <ul>
+            {% for album in artist_album.albums %}
+                <li>id : {{album.id}}</li>
+                <li>Name : {{album.name}}</li>
+                <li>Created at : {{album.created_on}}</li>
+                <li>Release date : {{album.releaseDateTime}}</li>
+                <li>Cost : {{album.cost}}</li>
+                ----------
+            {% endfor %}
+        </ul>
+        <br>
+    {% endfor %}
+</body>
+</html>

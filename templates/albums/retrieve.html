@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    {% for album in albums %}
+        <h1>name: {{album.name}}</h1>
+        <h1>cost: {{album.cost}}</h1>
+        <h1>artist: {{album.artist}}</h1>
+        <h1>release date: {{album.releaseDateTime}}</h1>
+        {% if album.is_approved %}
+            <h1>Approved</h1>
+        {% else %}
+            <h1>Not Approved</h1>
+        {% endif %}
+        <div>----------------------</div>
+    {% endfor %}
+</body>
+</html>

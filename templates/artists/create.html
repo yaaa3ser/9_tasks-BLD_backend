@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <form method="POST" action="{% url 'artists/store' %}">
+        {% if errs %}
+        <h5 style="color:red">
+        {% for e in errs %}
+            <div>{{e}}</div>
+            <br>
+        {%endfor%}
+        </h5>
+        {%endif%}
+        {% csrf_token %}
+
+        <input type="text" placeholder="Artist stage name" name="sn">
+        <br>
+        <br>
+        <input type="text" placeholder="Artist social link" name="sl">
+        <input type="submit" value="Save">
+    </form>
+</body>
+</html>
