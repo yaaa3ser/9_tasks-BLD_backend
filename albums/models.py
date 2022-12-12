@@ -22,3 +22,10 @@ class Album(TimeStampedModel):
     def __str__(self):
         return self.name
     
+class Song(models.Model):
+    name = models.CharField(max_length=100,blank=True)
+    album = models.ForeignKey(Album, on_delete=models.CASCADE,default=None)
+    
+    def __str__(self):
+        return self.name
+    

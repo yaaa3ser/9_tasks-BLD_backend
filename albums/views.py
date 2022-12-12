@@ -4,27 +4,45 @@ from .models import *
 from artists.models import *
 from django.core.exceptions import ValidationError
 from django.db.models import Q
+from django.views import View
 
-def retrieve(request):
-    albums = []
-    for album in Album.objects.all():
-        albums.append(album)  
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status, generics
+from .serializers import *
+
+class AlbumView(generics.ListCreateAPIView):
+    queryset = Album.objects.all()
+    serializer_class = AlbumSerializer
+
+@receiver(pre_save, sender=Song)
+def song_pre_save(sender, instance, **kwargs):
+    if instance.name =='':
+        album = instance.album
+        instance.name = album.name
+        
+class RetrieveAlbumView(View):
+    def get (self, request):
+        return render(request,"albums/retrieve.html", {'albums': Album.objects.all()})
     
-    return render(request,"albums/retrieve.html", {'albums': albums})
+class CreateAlbumView(View):
+    def get(self, request):
+        return render(request, "albums/create.html",{'artists' : Artist.objects.all()})
 
-def create(request):
-    return render(request, "albums/create.html",{'artists' : Artist.objects.all()})
+class StoreAlbumView(View):
+    def post(self, request):
+        album = Album()
+        album.name = request.POST['album_name']
+        album.cost = request.POST['album_cost']
+        album.artist = Artist.objects.get(id = int(request.POST['artist']))
+        album.releaseDateTime = request.POST['album_releaseDateTime']
+        album.is_approved = request.POST.get('album_is_approved', False)
+        if album.is_approved == 'on':
+            album.is_approved = True
 
-def store(request):
-    album = Album()
-    album.name = request.POST['album_name']
-    album.cost = request.POST['album_cost']
-    album.artist = Artist.objects.get(id = int(request.POST['artist']))
-    album.releaseDateTime = request.POST['album_releaseDateTime']
-    album.is_approved = request.POST.get('album_is_approved', False)
-    if album.is_approved == 'on':
-        album.is_approved = True
-
-    album.save()
-    return retrieve(request)
-    
+        album.save()
+        return RetrieveAlbumView.get(self,request)
+        

@@ -23,7 +23,7 @@
         <select name="artist">
             {% for artist in artists %}
                 <option value="{{ artist.id }}">
-                    {{ artist }}
+                    {{ artist.stageName }}
                 </option>
             {% endfor %}
         </select>

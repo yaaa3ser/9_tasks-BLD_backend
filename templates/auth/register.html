@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div style='margin-top:30px'>
+        <form method = "POST"> {% csrf_token %}
+            {% if error %} 
+                <h5 style="color:red">{{error}} </h5>
+            {%endif%}
+            <input type = "text" name="username" placeholder="Enter your username">
+            <input type = "text" name="email" placeholder="Enter your gmail">
+            <input type = "password" name="password" placeholder="Enter your password">
+            <input type = "password" name="re" placeholder="repeat password">
+            <input type="submit" value="Login" name="submit">
+        </form>
+    </div>
+{% endblock content%}
+

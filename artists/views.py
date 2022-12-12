@@ -3,28 +3,42 @@ from django.http import HttpResponse
 from .models import *
 from albums.models import *
 from django.core.exceptions import ValidationError
-from django.db.models import Q
+from django.views import View
+from django.contrib.auth.mixins import LoginRequiredMixin
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status, generics
+from .serializers import *
 
-def retrieve(request):
-    artistsWithAlbums = []
-    for artist in Artist.objects.all():
-        artistsWithAlbums.append({'artist':artist,'albums':artist.albums.all()})
+class ArtistView(generics.ListCreateAPIView):
+    queryset = Artist.objects.all()
+    serializer_class = ArtistSerializer
+
+class RetrieveArtistView(View):
+    def get (self, request):
+        artistsWithAlbums = []
+        for artist in Artist.objects.all():
+            artistsWithAlbums.append({'artist':artist,'albums':artist.albums.all()})
+        
+        return render(request,"artists/retrieve.html",{'artistsWithAlbums' : artistsWithAlbums})
     
-    return render(request,"artists/retrieve.html",{'artistsWithAlbums' : artistsWithAlbums})
-
-
-def create(request, errors={}):
-    return render(request, "artists/create.html",{"errs":errors})
-
-def store(request):
-    artist = Artist()
-    artist.stageName = request.POST['sn']
-    artist.socialLink = request.POST['sl']
-    try :
-        artist.full_clean()
-        artist.save()
-        return retrieve(request)
-    except ValidationError as validations:
-        errors = validations
-        return create(request,errors)
+class CreateArtistView(LoginRequiredMixin, View):
+    
+    login_url = 'login'
+    
+    def get(self,request, errors={}):
+        return render(request, "artists/create.html",{"errs":errors})
+    
+class StoreArtistView(View):
+    def post(self, request):
+        artist = Artist()
+        artist.stageName = request.POST['sn']
+        artist.socialLink = request.POST['sl']
+        try :
+            artist.full_clean()
+            artist.save()
+            return RetrieveArtistView.get(self, request)
+        except ValidationError as validations:
+            errors = validations
+            return render(request, "artists/create.html",{"errs":errors})
 
