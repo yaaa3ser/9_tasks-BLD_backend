@@ -22,9 +22,7 @@ class RetrieveArtistView(View):
         
         return render(request,"artists/retrieve.html",{'artistsWithAlbums' : artistsWithAlbums})
     
-class CreateArtistView(LoginRequiredMixin, View):
-    
-    login_url = 'login'
+class CreateArtistView(View):
     
     def get(self,request, errors={}):
         return render(request, "artists/create.html",{"errs":errors})

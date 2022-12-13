@@ -1,64 +1,45 @@
-from django.shortcuts import render,redirect
-from django.contrib.auth.models import User
-from django.contrib.auth import authenticate,login,logout
-from django.views import View
-import json
-from django.http import JsonResponse
-from django.http import HttpResponseRedirect
+from django.shortcuts import render
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.authtoken.serializers import AuthTokenSerializer
+from knox.auth import AuthToken
+from .serializers import RegisterSerializer
 
 
-class LoginView(View):
-    def get(self,request):
-        return render(request , 'auth/login.html',{})
-    
-    def post(self, request):
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        user = authenticate(request, username = username, password = password)
-        if user is not None:
-            login(request, user)
-            # this if do so ==> if last page was artists/create and auth is needed so after log in go to artists/create automatically
-            if self.request.GET.get('next'):
-                return redirect(self.request.GET.get('next'))  
-            else:
-                return redirect('/admin')
-        else:
-            status = {'error': 'Invalid username or password !'}
-            return render(request,'auth/login.html',status)
-    
-class LogoutView(View):
-    def get(self,request):
-        return render(request , 'auth/logout.html',{})
-    
-    def post(self, request):
-        logout(request)
-        return redirect('/logout')
-    
-    
-class RegisterView(View):
-    def get(self, request):
-        return render(request, 'auth/register.html',{})
-    
-    def post(self,request,*args, **kwargs):
-        username = request.POST.get('username')
-        email = request.POST.get('email')
-        password = request.POST.get('password')
-        repeat_pass = request.POST.get('re')
-
-        if password == repeat_pass:
-            try:
-                if User.objects.get(username=username):
-                    status = {'error': "username already exists"}
-                    return render(request, 'auth/register.html',status)
-            except:
-                try:
-                    user = User.objects.create_user(username=username, password=password)
-                    user.save()
-                    # login(request,user)
-                    return redirect('/login')
-                except:
-                    status = {'error': "failed"}
-                    return render(request, 'auth/register.html',status)
+class LoginView(APIView):  
+    authentication_classes = []
+    def post(self, request, *args, **kwargs):
+        # validate username and password are correct
+        serializer = AuthTokenSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        # once it is correct, get the user from the validated data
+        user = serializer.validated_data['user']
+        # make a token
+        _,token = AuthToken.objects.create(user)
         
-        status = {'error': "password doesn't match"}
-        return render(request, 'auth/register.html',status)
+        return Response({
+            'token': token,
+            'user':{
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "bio": user.bio
+            }
+        })
+        
+class RegisterView(APIView):
+    def post(self, request,*args, **kwargs):
+        serializer = RegisterSerializer(data = request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        
+        _,token = AuthToken.objects.create(user)
+        return Response({
+            'token': token,
+            'user':{
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "bio": user.bio
+            }
+        })
