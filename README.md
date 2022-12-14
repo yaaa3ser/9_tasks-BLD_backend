@@ -42,6 +42,6 @@
     - [edit artists views](https://github.com/yaaa3ser/9_tasks-BLD_backend/blob/task4%2C5/artists/views.py)
     - [edit artists urls](https://github.com/yaaa3ser/9_tasks-BLD_backend/blob/task4%2C5/artists/urls.py)
     
-    - ![sample: ](sample DRF.png)
+    - ![sample: ](sampleDRF.png)
 
     
