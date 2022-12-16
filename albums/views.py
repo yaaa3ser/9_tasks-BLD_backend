@@ -13,6 +13,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics
 from .serializers import *
+from rest_framework import status, generics
 
 class AlbumView(generics.ListCreateAPIView):
     queryset = Album.objects.all()
@@ -23,7 +24,7 @@ def song_pre_save(sender, instance, **kwargs):
     if instance.name =='':
         album = instance.album
         instance.name = album.name
-        
+    
 class RetrieveAlbumView(View):
     def get (self, request):
         return render(request,"albums/retrieve.html", {'albums': Album.objects.all()})

@@ -4,6 +4,7 @@ from knox.models import AuthToken
 from .serializers import *
 from knox.auth import TokenAuthentication
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 
 class DetailedUser(generics.GenericAPIView):
     # default auth is token auth ===> see settings.py
@@ -18,7 +19,7 @@ class DetailedUser(generics.GenericAPIView):
         try:
             user = User.objects.get(id=pk)
             return Response(UserSerializer(user).data)
-        except:
+        except user.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND, data="User Not Found")
         
     def put(self,request,pk):
