@@ -9,7 +9,7 @@ class ArtistAlbum(admin.ModelAdmin):
     def Approved_Albums(self,obj):
         return len(obj.albums.filter(is_approved=True))
     
-    list_display = ('stageName', 'socialLink', 'Approved_Albums')
+    list_display = ('stageName', 'socialLink', 'Approved_Albums','user')
     
     inlines = [AlbumAdmin]
 
