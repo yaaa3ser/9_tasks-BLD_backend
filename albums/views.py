@@ -59,9 +59,9 @@ class AlbumCreateView(generics.CreateAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     
-# class RetrieveAlbumView(View):
-#     def get (self, request):
-#         return render(request,"albums/retrieve.html", {'albums': Album.objects.all()})
+class RetrieveAlbumView(View):
+    def get (self, request):
+        return render(request,"albums/retrieve.html", {'albums': Album.objects.all()})
     
 class CreateAlbumView(View):
     def get(self, request):
