@@ -1,120 +1,31 @@
-## **_*Permissions and Django Filters*_**
+## **_*Running Asynchronous Tasks using Celery*_**
 ----------------------------------------
 
-- Added a relationship field to the Artist model that maps an artist to a user instance.
+1. Installed redis-server
 
-```py
-from django.db import models 
-from users.models import User
+2. Installed celery as a project dependency
 
-class Artist(models.Model):
-    stageName = models.CharField(max_length=100, unique=True ,verbose_name = 'Name')
-    socialLink = models.URLField(max_length=250, verbose_name = 'social media')      
---> user = models.OneToOneField(User,on_delete=models.CASCADE) <--
-```
+3. Installed redis as a project dependency
 
-- GET should return a list of approved albums
+4. Integrated celery with the project
 
-  - responnse
-    ```json
-    [
-        {
-            "id": 1,
-            "artist": {
-                "id": 1,
-                "stageName": "yasser issa",
-                "socialLink": "https://www.twitter.com/yasser"
-            },
-            "name": "mesh 55555",
-            "releaseDateTime": "2022-12-18T05:44:42+03:00",
-            "cost": "1200.00",
-            "is_approved": true
-        },
-        {
-            "id": 2,
-            "artist": {
-                "id": 1,
-                "stageName": "yasser issa",
-                "socialLink": "https://www.twitter.com/yasser"
-            },
-            "name": "55555",
-            "releaseDateTime": "2022-12-18T07:40:43+03:00",
-            "cost": "1300.00",
-            "is_approved": false
-        }
-    ]
-    ```
-    - Permit any type of request whether it's authenticated or not
+5. Setup a gmail email to use for this project to send emails from
 
-    - It doesn't make sense to return all albums that we have to the frontend at once, if we have hundreds of thousands of albums, the user's screen will not be able to render that much data, instead we should support pagination.
-    
+6. Used django-environ to import secure environment variables like the redis server address or email credentials
 
-    ***settings.py***
+7. Defined a task in albums/tasks.py 
 
-    ```python
-    REST_FRAMEWORK = {
-        ...
+8. Defined a task that receives the artist and album data as arguments and send the artist a congratulation email.
+    - [see tasks.py](/albums/tasks.py)
 
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-        'PAGE_SIZE': 2,
-
-        ...
-        }
-    ```
-    - [see serializers](albums/serializers.py)
-
-    - [see views](albums/views.py)
-
-- Bonus: Can you create and use custom queryset manager that only returns approved albums?
-
-***albums.models.py***
-```python
-class AlbumQuery (models.QuerySet):
-    def is_approved(self):
-        return self.filter(isApproved=True)
-
-    def search(self, q):
-        return self.filter(name__icontains=q)
-```
+    - [edit views](/albums/views.py)
+        ```py
+        if serializer.is_valid():
+            serializer.save()
+         -->send_congratulation_email(data,user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        ```
 
 
-- POST should accept a JSON body, create an album, and raise proper validation errors for all fields
-
-    - The request body should look like: { "name": ..., "release_datetime": ..., "cost": ..., }
-    - Permit only authenticated requests
-    - The request must be authenticated by a user who is also an artist
-    - The created album will be mapped to the artist who made the request
-    - 403 Forbidden error should be raised if a POST request is not authenticated or if it's authenticated by a
-    user who isn't an artist
-
-    - [see edited views](albums/views.py)
-- Using django-filter , support the following optional filters for GET requests:
-    - Cost greater than or equal
-    - Cost less than or equal
-    - Case-insensitive containment
-
-
-***albums.filters.py***
-```py
-import django_filters
-from albums.models import *
-
-
-class AlbumFilter(django_filters.FilterSet):
-    name = django_filters.CharFilter(lookup_expr='icontains')
-    cost__lte = django_filters.NumberFilter(field_name="cost", lookup_expr='lte')
-    cost__gte = django_filters.NumberFilter(field_name="cost", lookup_expr='gte')
-
-    class Meta:
-        model = Album
-        fields = ['name', 'cost__lte', 'cost__gte']
-
-```
-
-***albums.views.py***
- ```py
-class ListAlbum(generics.ListAPIView):
-    ...    
-    filterset_class = AlbumFilter
-    ...
- ```
+## **_*Finished*_**
