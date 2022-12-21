@@ -56,7 +56,7 @@ class AlbumCreateView(generics.CreateAPIView):
         serializer = CreateAlbumSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            send_congratulation_email.delay(data,artist)
+            send_congratulation_email.delay(artist,data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
