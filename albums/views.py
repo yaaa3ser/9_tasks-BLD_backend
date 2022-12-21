@@ -16,6 +16,7 @@ from rest_framework.permissions import IsAuthenticated , AllowAny
 from rest_framework.pagination import PageNumberPagination
 from django_filters import rest_framework as filters
 from .filters import AlbumFilter
+from users.serializers import UserSerializer
 from .tasks import send_congratulation_email
 
 # class LargeResultsSetPagination(PageNumberPagination):
@@ -47,14 +48,15 @@ class AlbumCreateView(generics.CreateAPIView):
     def post(self, request):
         data = request.data
         user = request.user
-        
+        artist = UserSerializer(user).data
+        # print(artist['email'])
         if(data ['artist'] != Artist.objects.get(user=user).id):
             return Response("user is not registered as artist" , status=status.HTTP_403_FORBIDDEN)
         
         serializer = CreateAlbumSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            send_congratulation_email(data,user)
+            send_congratulation_email.delay(data,artist)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

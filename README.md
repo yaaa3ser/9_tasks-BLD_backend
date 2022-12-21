@@ -20,9 +20,18 @@
 
     - [edit views](/albums/views.py)
         ```py
+        def post(self, request):
+        data = request.data
+        user = request.user
+        artist = UserSerializer(user).data
+        print(artist['email'])
+        if(data ['artist'] != Artist.objects.get(user=user).id):
+            return Response("user is not registered as artist" , status=status.HTTP_403_FORBIDDEN)
+        
+        serializer = CreateAlbumSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-         -->send_congratulation_email(data,user)
+        --> send_congratulation_email.delay(data,artist)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         ```
